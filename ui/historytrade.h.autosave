@@ -1,0 +1,32 @@
+#ifndef HISTORYTRADE_H
+#define HISTORYTRADE_H
+
+#include "baseview.h"
+
+class HistoryTrade:public BaseView
+{
+public:
+    HistoryTrade(QWidget *parent,QString s):BaseView(parent,s)
+      {
+        
+        
+    }
+};
+
+class TradeLog:public BaseView
+{
+public:
+    TradeLog(QWidget *parent,QString s):BaseView(parent,s)
+    {
+        Dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+        this->DockInit(0,0,400,180);
+        headerName.empty();
+        headerName.append(QString::fromLocal8Bit("时间"));
+        headerName.append(QString::fromLocal8Bit("日志类型"));
+        headerName.append(QString::fromLocal8Bit("内容"));
+        this->addTable(400,180,firstTable,headerName);
+
+    }
+};
+
+#endif // HISTORYTRADE_H

@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/email.png</file>
+        <file>icon/formskin.png</file>
+        <file>icon/icon.png</file>
+        <file>icon/qt.png</file>
+        <file>icon/save.png</file>
+        <file>icon/spqy.png</file>
+        <file>icon/timg.jpg</file>
+        <file>icon/ymrl.png</file>
+        <file>icon/downarrow.png</file>
+        <file>icon/add.jpg</file>
+        <file>icon/minus.jpg</file>
+        <file>icon/delete.jpg</file>
+    </qresource>
+</RCC>
