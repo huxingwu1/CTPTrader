@@ -37,9 +37,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //界面布局初始化
     viewInit();
 
-    mylogin = new Login;            //登录
-    myemail = new MyEmail;          //邮件
-    mysearch = new SearchInstrument;    //  查询合约
+    mylogin = new Login(this);            //登录   //对于自定义类型，都会调用默认构造函数，加不加括号没区别。
+    mylogin_n = new Login_otheraccount;   //多账户登录
+    myemail = new MyEmail;                //邮件
+    mysearch = new SearchInstrument;      //  查询合约
+    datalocal = new DataFromLocal;        //添加本地数据
     actioncd = new QAction(QString::fromLocal8Bit("撤单"), this);
     actionOffset = new QAction(QString::fromLocal8Bit("平仓"), this);
     //connect连接
@@ -117,13 +119,22 @@ bool MainWindow::eventFilter(QObject *target, QEvent *e)
 
 void MainWindow::showlogin()
 {
-    mylogin->show();
-//    // 设置只能显示一个登陆框
-//    if(nullptr ==mylogin)
-//    {
-//        mylogin->show();
-//    }
+    // 主登陆框多次登录相同账号 会导致程序崩溃，因此设置主登陆框只显示一次
+    if(me->me_get_is_login())
+    {
+        int ret = QMessageBox::warning(this, QString::fromLocal8Bit("登录异常"),QString::fromLocal8Bit("程序已登录，重新登录请重启程序，添加账号请点击 “登录——添加多账号” "),QMessageBox::Ok);
+    }
+    else
+    {
+        mylogin->show();
+    }
+
     //this->restoreState(saveMyState);
+}
+
+void MainWindow::showlogin_n()
+{
+    mylogin_n->show();
 }
 
 void MainWindow::MDTDLogin(QString account)
@@ -137,9 +148,22 @@ void MainWindow::MDTDLogin(QString account)
     QString password = accountlist.at(4);
     //void MainEngine::me_login(QString userid, QString password, QString brokerid, QString mdAddress, QString tdAddress);
     me->me_login(userid, password, broker, md, td);
-    QThread::msleep(200);     //暂停2秒
+    QThread::msleep(1000);     //暂停2秒
     qDebug()<<"MainWindow::MDTDLogin";
 
+}
+
+void MainWindow::MDTDLogin_n(QString account)
+{
+    //传过来的类型 td + "," +brokerid +","+account +","+password;
+    QStringList accountlist = account.split(",");
+    QString td = accountlist.at(0);
+    QString broker = accountlist.at(1);
+    QString userid = accountlist.at(2);
+    QString password = accountlist.at(3);
+    me->me_login(userid, password, broker, td);
+    QThread::msleep(1000);     //暂停2秒
+    qDebug()<<"MainWindow::MDTDLogin_n";
 }
 
 // 订阅行情
@@ -333,7 +357,7 @@ void MainWindow::OnWtMenu1(const QPoint &pt)
 
 void MainWindow::PrintLog(QString s)
 {
-    QStringList strlist = s.split("++");
+    QStringList strlist = s.split("++");                                
     if("Debug:"== strlist.at(0))   // 目前只当前只打印 Debug
     {
         int row = tradelog->firstTable->rowCount();
@@ -452,7 +476,10 @@ void MainWindow::setMenu()
     });
 
     menuLogin->addSeparator();      //添加分隔符
-    QAction *actionLogin_n = menuLogin->addAction(QIcon(":/icon/spqy.png"),QString::fromLocal8Bit("多账户登录"));
+    QAction *actionLogin_n = menuLogin->addAction(QIcon(":/icon/spqy.png"),QString::fromLocal8Bit("添加多账户"));
+    connect(actionLogin_n,&QAction::triggered,[=](){
+        showlogin_n();
+    });
 
 
     //回测栏
@@ -478,8 +505,12 @@ void MainWindow::setMenu()
 
 
     //数据栏
-    QAction *actionLoadData = menuData->addAction(QString::fromLocal8Bit("加载本地数据"));
+    QAction *actionLoadData = menuData->addAction(QIcon(":/icon/save.png"),QString::fromLocal8Bit("加载本地数据"));
+    connect(actionLoadData,&QAction::triggered,[=](){
+        datalocal->show();
+    });
     QAction *actionLoadData1 = menuData->addAction(QString::fromLocal8Bit("下载数据"));
+    QAction *showLoadData = menuData->addAction(QString::fromLocal8Bit("查看本地数据"));
 
     //帮助栏
     QAction *recoveryView = menuHelp->addAction(QString::fromLocal8Bit("恢复界面"));
@@ -623,6 +654,17 @@ bool MainWindow::getSendOrderRequest(orderCommonRequest &order_field)
     else if(1 == tradeboard->tradeboard.pricetype_comboBox->currentIndex())   //市价按最新成交价
     {
         order_field.price = tradeboard->tradeboard.newPrice1_show->text().toDouble();
+    }
+    else if(2 == tradeboard->tradeboard.pricetype_comboBox->currentIndex())   //按对手价成交
+    {
+        if(0==tradeboard->tradeboard.direction_comboBox->currentIndex())      //买，按卖一价买
+        {
+            order_field.price = tradeboard->tradeboard.AskPrice1_show->text().toDouble();
+        }
+        else if(1==tradeboard->tradeboard.direction_comboBox->currentIndex()) //卖，按买一价卖
+        {
+            order_field.price = tradeboard->tradeboard.BidPrice1_show->text().toDouble();
+        }
     }
 
     // direction

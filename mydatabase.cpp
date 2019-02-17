@@ -1,6 +1,34 @@
 #include "mydatabase.h"
 
 
+MyDataBase::MyDataBase(QString HostName, QString DatabaseName)
+{
+    QString con_path = "Data/";      //默认在Data文件夹下面
+
+    QDir temp;
+    if (!temp.exists(con_path))
+    {
+        bool n = temp.mkpath(con_path);   //Creates the directory path dirPath.
+    }
+
+
+    m_HostName = HostName;
+    m_DatabaseName = DatabaseName;
+    m_db = QSqlDatabase::addDatabase("QSQLITE");
+    m_db.setHostName(m_HostName);
+    m_db.setDatabaseName(m_DatabaseName);
+    m_query = new QSqlQuery(m_db);
+    if(!m_db.open())
+    {
+        qDebug()<<"database open error.";
+        m_error = m_db.lastError();
+    }
+    else
+    {
+        qDebug()<<"database open successful.";
+    }
+}
+
 MyDataBase::MyDataBase(QString HostName, QString DatabaseName, QString UserNmae, QString Password)
 {
     m_HostName = HostName;
@@ -66,16 +94,30 @@ bool MyDataBase::add(QString table_name, QMap<QString, QString> data)
     for(QMap<QString,QString>::const_iterator i=data.constBegin();i!=data.constEnd();i++)
     {
         sql+=i.key()+", ";
-        values+=i.value()+", ";
+        values+="'"+ i.value()+ "'" +", ";
     }
     sql.chop(2);
     values.chop(2);
     sql+=")";
     values+=")";
     sql+=values;
-    qDebug()<<sql;
+
+//    QString sql="insert into "+table_name+ " values(";
+//    for(QMap<QString,QString>::const_iterator i=data.constBegin();i!=data.constEnd();i++)
+//    {
+//        sql+= "'"+i.value()+"'"+ ", ";
+//    }
+//    sql.chop(2);
+//    sql+=")";
+//    qDebug()<<sql;
     m_query->prepare(sql);
-    return m_query->exec();
+    bool ret = m_query->exec();
+    if(!ret)
+    {
+        m_error = m_query->lastError();
+        qDebug()<<m_error.driverText()<<QString(QObject::tr("数据插入失败"));
+    }
+    return ret;
 
 }
 
@@ -175,6 +217,21 @@ bool MyDataBase::find(QString table_name, QList<QString> key, QList<QList<QStrin
     }
     else return 0;
 
+}
+
+bool MyDataBase::IsExist(QString tableName)
+{
+    m_query->exec(QString("select count(*) from sqlite_master where type='table' and name='%1'").arg(tableName));
+    if(m_query->next())
+    {
+        if(m_query->value(0).toInt()==0)
+        {
+            // 表不存在
+            return false;
+        }else{
+            return true;
+        }
+    }
 }
 
 QString MyDataBase::getError()

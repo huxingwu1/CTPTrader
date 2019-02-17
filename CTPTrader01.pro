@@ -50,7 +50,9 @@ SOURCES += main.cpp\
     ui/instrumentinfo.cpp \
     smtp.cpp \
     mydatabase.cpp \
-    ui/strategymonitor.cpp
+    ui/strategymonitor.cpp \
+    login_otheraccount.cpp \
+    datafromlocal.cpp
 
 HEADERS  += mainwindow.h \
     ui/baseview.h \
@@ -92,12 +94,16 @@ HEADERS  += mainwindow.h \
     ui/instrumentinfo.h \
     smtp.h \
     mydatabase.h \
-    ui/strategymonitor.h
+    ui/strategymonitor.h \
+    login_otheraccount.h \
+    datafromlocal.h
 
 FORMS    += mainwindow.ui \
     login.ui \
     myemail.ui \
-    searchinstrument.ui
+    searchinstrument.ui \
+    login_otheraccount.ui \
+    datafromlocal.ui
 
 RESOURCES += \
     res.qrc

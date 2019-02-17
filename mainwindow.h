@@ -25,6 +25,8 @@
 #include <QMenu>
 #include "login.h"
 #include "myemail.h"
+#include "datafromlocal.h"
+#include "login_otheraccount.h"
 #include "searchinstrument.h"
 #include "ui/accountinfo.h"
 #include "ui/hangqinginfo.h"
@@ -56,8 +58,12 @@ public:
 public slots:
     //显示登录界面框
     void showlogin();
-    //登录函数
+    // 添加多账户界面
+    void showlogin_n();
+    // 登录函数
     void MDTDLogin(QString);
+    // 添加多账户登录
+    void MDTDLogin_n(QString);
 
     void OnInstrmentLineTextSubscribe();
     void OnSendOrderClicked();
@@ -97,8 +103,10 @@ public:
     TradeboardInfo *tradeboard;   //"hangqinginfo.cpp"调用
 private:
     Login * mylogin {nullptr};   //登陆框指针
+    Login_otheraccount *mylogin_n;  //添加多账户
     MyEmail * myemail {nullptr};      //邮件
     SearchInstrument *mysearch  {nullptr};   //查询合约
+    DataFromLocal * datalocal;      //添加本地数据
 
     Ui::MainWindow *ui;
     MyAccountInfo *account;

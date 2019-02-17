@@ -1,7 +1,6 @@
 #ifndef TECHINDICATOR_H
 #define TECHINDICATOR_H
 
-
 #include <vector>
 
 class TechIndicator

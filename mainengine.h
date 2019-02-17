@@ -8,6 +8,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QDir>
+#include <QList>
 #include "eventengine.h"
 #include "dataengine.h"
 #include "ctaengine.h"
@@ -36,6 +37,8 @@ signals:
 public:
     // 登录
     void me_login(QString userid, QString password, QString brokerid, QString mdAddress, QString tdAddress);
+    // 多账户登录
+    void me_login(QString userid, QString password, QString brokerid, QString tdAddress);
     // 退出
     void me_logout();
     // 订阅行情
@@ -91,6 +94,8 @@ private:
     // Gateway接口
     CtpMdApi* ctpmd;
     CtpTdApi* ctptd;
+
+    QList <CtpTdApi*> ctptdGateway;  //添加多账户存放在ctptdGateway中
 public:
     std::ofstream g_OutputDebug;
 };

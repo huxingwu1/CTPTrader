@@ -100,6 +100,25 @@ void MainEngine::me_login(QString userid, QString password, QString brokerid, QS
     me_is_login.store(true);
 }
 
+void MainEngine::me_login(QString userid, QString password, QString brokerid, QString tdAddress)
+{
+    CtpTdApi *ctptd1 = new CtpTdApi(ee, de);
+
+    ctptd1->ctp_td_init(tdAddress, userid, password, brokerid);
+    while (true)
+    {
+        if (ctptd1->get_is_td_connect())
+        {
+            ctptd1->ctp_td_login();      //td行情登录
+            break;
+        }
+    }
+    // 时间触发：暂定查询资金和持仓动作
+    // register_event(EVENT_TIMER, ctptd1, &CtpTdApi::ctp_td_query);
+    // 添加进ctptdGateway 列表
+    ctptdGateway.push_back(ctptd1);
+}
+
 void MainEngine::me_logout()
 {
     // 如果登录完成标记为true才释放资源
@@ -115,6 +134,9 @@ void MainEngine::me_logout()
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+        // 注销 ctptdGateway中的td
+
+
         ctptd->ctp_td_release();
 
         // 关闭Event引擎
@@ -172,6 +194,7 @@ QString MainEngine::me_sendDefaultOrder(orderCommonRequest &order_field)
                                              order_field.volume,
                                              order_field.direction,
                                              order_field.offset);
+        // 将ctptdGateway中的td跟单
     }
 }
 
@@ -187,6 +210,7 @@ void MainEngine::me_cancelOrder(cancelCommonRequest &cancel_field)
                                   cancel_field.order_ref,
                                   cancel_field.front_id,
                                   cancel_field.session_id);
+        //ctptdGateway中的td撤单暂时不能实现
     }
 }
 

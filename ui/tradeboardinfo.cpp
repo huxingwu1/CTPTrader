@@ -124,6 +124,7 @@ void TradeboardInfo::tradeboardInit(QWidget *parent)
     tradeboard.pricetype_comboBox = new QComboBox(parent);
     tradeboard.pricetype_comboBox->addItem(QString::fromLocal8Bit("限价"));
     tradeboard.pricetype_comboBox->addItem(QString::fromLocal8Bit("市价"));
+    tradeboard.pricetype_comboBox->addItem(QString::fromLocal8Bit("对手价"));
     tradeboard.pricetype_comboBox->setParent(Dock);
     tradeboard.pricetype_comboBox->setGeometry(70,180,100,20);
     tradeboard.BidPrice1_vol = new QLabel(QString::fromLocal8Bit("买一量:"),parent);

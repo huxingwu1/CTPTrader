@@ -63,8 +63,13 @@ void Login::Init_Login_info()
     QString ps = configIniRead->value("account/password").toString();
     if(0!=ps.size())
         ui->Password_Edit->setText(ps);
-    //密码格式，保存账户
+    // 密码格式，保存账户
     ui->Password_Edit->setEchoMode(QLineEdit::Password);
+    // 密码框设置只能输入字母与数字
+    QRegExp regx("[a-zA-Z0-9]+$");
+    QValidator *validator1 = new QRegExpValidator(regx, ui->Password_Edit );
+    ui->Password_Edit->setValidator( validator1 );
+    //
     ui->SaveAccount->setChecked(true);
 
     qDebug()<<QString::fromLocal8Bit("Login初始化成功");

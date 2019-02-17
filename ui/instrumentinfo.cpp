@@ -33,10 +33,10 @@ InstrumentShow::~InstrumentShow()
 
 void InstrumentShow::updateData(Event ev)
 {
-    qDebug()<<"InstrumentShow::updateData";      //显示合约信息影响性能，暂时不显示
-    initData(ev);
-    refrushTable(grid_data_list);
-    saveInstrument(grid_data_list);
+//    qDebug()<<"InstrumentShow::updateData";      //显示合约信息影响性能，暂时不显示
+//    initData(ev);
+//    refrushTable(grid_data_list);
+//    saveInstrument(grid_data_list);
 }
 
 void InstrumentShow::initData(Event ev)
