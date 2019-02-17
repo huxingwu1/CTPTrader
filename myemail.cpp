@@ -24,8 +24,6 @@ MyEmail::MyEmail(QWidget *parent) :
     ui->password->setText(password);
     QString recevice = configIniRead->value("email/recevice").toString();
     ui->receviceAddress->setText(recevice);
-
-    //ui->password->setEchoMode(QLineEdit::Password);
     ui->radioButton_save->setChecked(true);
 }
 
@@ -58,36 +56,6 @@ void MyEmail::on_pushButton_clicked()
         configIniWrite->setValue("email/password", password);
         configIniWrite->setValue("email/recevice", receviceAddress);
     }
-    //实例email指针
-    if(nullptr != sendmail)
-    {
-        delete sendmail;
-        sendmail = nullptr;
-        //qDebug()<<"sendmail = nullptr";
-    }
-    sendmail = new Smtp(server, sendAddress, password);
-    qDebug()<<QString::fromLocal8Bit("邮箱实例化成功");
-    this->close();
-}
-
-void MyEmail::sendEmail(QString theme, QString content)
-{
-    if(nullptr == sendmail)
-    {
-
-    }
-    else
-    {
-        if(sendmail->Send(this->sendAddress , theme, content));
-        {
-            if(sendmail->PutSendLine())
-            {
-                qDebug() <<QString::fromLocal8Bit("邮件发送成功.");
-            }
-            else
-            {
-                qDebug() <<QString::fromLocal8Bit("邮件发送失败.");
-            }
-        }
-    }
+    QString EMAIL = server + "," + sendAddress + "," +password +","+receviceAddress;
+    sendEmail(EMAIL);
 }

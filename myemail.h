@@ -9,6 +9,10 @@
 #include <QDir>
 #include "smtp.h"
 
+/*
+ * 获得邮箱信息，通过信号与槽传给mainengine中的结构体.
+ */
+
 namespace Ui {
 class MyEmail;
 }
@@ -24,6 +28,9 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+signals:
+    void sendEmail(QString);
+
 private:
     Ui::MyEmail *ui;
     QSettings *configIniRead;    //读配置文件
@@ -33,10 +40,6 @@ private:
     QString sendAddress;
     QString password;
     QString receviceAddress;
-public:
-    Smtp *sendmail {nullptr};    //邮箱指针
-    void sendEmail(QString theme, QString content);
-
 };
 
 #endif // MYEMAIL_H

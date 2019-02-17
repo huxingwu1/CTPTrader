@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     actionOffset = new QAction(QString::fromLocal8Bit("平仓"), this);
     //connect连接
     connect(this->mylogin, SIGNAL(sendAccount(QString)), this, SLOT(MDTDLogin(QString)));
+    connect(this->mylogin_n,SIGNAL(sendAccount(QString)), this, SLOT(MDTDLogin_n(QString)));
+    connect(this->myemail, SIGNAL(sendEmail(QString)), this, SLOT(SaveEamil(QString)));
     connect(actioncd, SIGNAL(triggered()), this, SLOT(OnCancelOne()));   //右键撤单
     connect(actionOffset, SIGNAL(triggered()), this, SLOT(OffsetOne()));   //右键平仓
     connect(me,SIGNAL(sendLog(QString)),this,SLOT(PrintLog(QString)));
@@ -164,6 +166,19 @@ void MainWindow::MDTDLogin_n(QString account)
     me->me_login(userid, password, broker, td);
     QThread::msleep(1000);     //暂停2秒
     qDebug()<<"MainWindow::MDTDLogin_n";
+}
+
+void MainWindow::SaveEamil(QString Info)
+{
+    qDebug()<<Info;
+    QStringList emaillist = Info.split(",");
+    me->emailinfo.server = emaillist.at(0);
+    me->emailinfo.sendAddress = emaillist.at(1);
+    me->emailinfo.password = emaillist.at(2);
+    me->emailinfo.receviceAddress = emaillist.at(3);
+    me->isEmail = true;
+    // 关闭邮箱配置界面
+    myemail->close();
 }
 
 // 订阅行情

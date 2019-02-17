@@ -21,6 +21,24 @@ MainEngine::MainEngine(QObject *parent): QObject(parent)
 
 }
 
+MainEngine::~MainEngine()
+{
+    if(emailList.size()>0)
+    {
+        for(int i=0;i<emailList.size();i++)
+        {
+            delete emailList.at(i);
+        }
+    }
+    if(ctptdGateway.size()>0)
+    {
+        for(int i=0;i<ctptdGateway.size();i++)
+        {
+            delete ctptdGateway.at(i);
+        }
+    }
+}
+
 void MainEngine::outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     static QMutex mutex;
@@ -102,7 +120,7 @@ void MainEngine::me_login(QString userid, QString password, QString brokerid, QS
 
 void MainEngine::me_login(QString userid, QString password, QString brokerid, QString tdAddress)
 {
-    CtpTdApi *ctptd1 = new CtpTdApi(ee, de);
+    CtpTdApi *ctptd1 = new CtpTdApi(ee, de);     //用ee,de是否合适
 
     ctptd1->ctp_td_init(tdAddress, userid, password, brokerid);
     while (true)
@@ -189,12 +207,36 @@ QString MainEngine::me_sendDefaultOrder(orderCommonRequest &order_field)
                 << order_field.price
                 << QString::fromLocal8Bit("下单成功.");
 
+        // 将ctptdGateway中的td跟单，改为发送市价对手单
+        if(ctptdGateway.size()>0)
+        {
+            for(int i=0;i<ctptdGateway.size();i++)
+            {
+                ctptdGateway.at(i)->ctp_td_send_limitOrder(order_field.instrument,
+                                                           order_field.price,
+                                                           order_field.volume,
+                                                           order_field.direction,
+                                                           order_field.offset);
+            }
+        }
+
+        //发送邮件
+        if(true == isEmail)
+        {
+            QString theme = QString::fromLocal8Bit("下单");
+            QString content = QString("instrument:%1,price:%2,volume:%3,direction:%4,offset:%5")
+                    .arg(order_field.instrument).arg(order_field.price).arg(order_field.volume)
+                    .arg(order_field.direction).arg(order_field.offset);
+            qDebug()<<content;
+            this->sendEmail(theme,content);
+        }
+
         return ctptd->ctp_td_send_limitOrder(order_field.instrument,
                                              order_field.price,
                                              order_field.volume,
                                              order_field.direction,
                                              order_field.offset);
-        // 将ctptdGateway中的td跟单
+
     }
 }
 
@@ -210,7 +252,18 @@ void MainEngine::me_cancelOrder(cancelCommonRequest &cancel_field)
                                   cancel_field.order_ref,
                                   cancel_field.front_id,
                                   cancel_field.session_id);
-        //ctptdGateway中的td撤单暂时不能实现
+        //因为不知道挂单，ctptdGateway中的td撤单暂时不能实现
+
+        //发送邮件
+        if(true == isEmail)
+        {
+            QString theme = QString::fromLocal8Bit("取消订单");
+            QString content = QString("instrument:%1, exchange:%2, order_ref:%3, front_id:%4, session_id:%5")
+                    .arg(cancel_field.instrument).arg(cancel_field.exchange).arg(cancel_field.order_ref)
+                    .arg(cancel_field.front_id).arg(cancel_field.session_id);
+            qDebug()<<content;
+            this->sendEmail(theme,content);
+        }
     }
 }
 
@@ -243,6 +296,42 @@ bool MainEngine::me_get_contract(QString vtSymbol, InstrumentInfo &contract)
 bool MainEngine::me_get_order(QString ordID, OrderInfo &ordInfo)
 {
     return de->de_get_order(ordID, ordInfo);
+}
+
+void MainEngine::sendEmail(QString theme, QString content)
+{
+    Smtp *sendmail = new Smtp(emailinfo.server,emailinfo.sendAddress,emailinfo.password);  //待解决问题，会导致内存泄漏，delete导致邮件无法发出
+    emailList.append(sendmail);
+    if(sendmail->Send(emailinfo.receviceAddress,theme,content))
+    {
+        if(sendmail->PutSendLine())
+        {
+            qDebug() << QString::fromLocal8Bit("邮件发送成功.");
+        }
+        else
+        {
+            qDebug() << QString::fromLocal8Bit("邮件发送失败.");
+        }
+    }
+
+
+//    try{
+//        if(sendmail->Send(emailinfo.receviceAddress,theme,content))
+//        {
+//            if(sendmail->PutSendLine())
+//            {
+//                qDebug() <<"邮件发送成功.";
+//            }
+//            else
+//            {
+//                qDebug() << "邮件发送失败.";
+//            }
+//        }
+//    }
+//    catch(...)
+//    {
+//        qDebug() << "try邮件发送失败.";
+//    }
 }
 
 MainEngine::AskBidPrice MainEngine::me_getInstrumentPrice(QString instruments)

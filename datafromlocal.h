@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QTime>
+#include <QRegExpValidator>
 #include "mydatabase.h"
 
 // 将本地数据（csv/txt）导入数据库

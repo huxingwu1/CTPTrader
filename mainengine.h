@@ -14,6 +14,7 @@
 #include "ctaengine.h"
 #include "ctpmdapi.h"
 #include "ctptdapi.h"
+#include "smtp.h"
 
 
 // 框架对外主引擎,管理框架对外的所有公共交易和查询，内部实现不同接口的命令转发
@@ -22,6 +23,7 @@ class MainEngine : public QObject
     Q_OBJECT
 public:
     MainEngine(QObject *parent = nullptr);
+    ~MainEngine();
     //日志函数
     void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
@@ -58,6 +60,8 @@ public:
     // CTA下单查询合约和委托单
     bool me_get_contract(QString vtSymbol, InstrumentInfo& contract);
     bool me_get_order(QString ordID, OrderInfo& ordInfo);
+    // 发送邮件
+    void sendEmail(QString theme, QString content);
 
     // 从de->allInstruments中获得合约instrument最新的价格
     typedef struct AskBidPrice
@@ -98,6 +102,15 @@ private:
     QList <CtpTdApi*> ctptdGateway;  //添加多账户存放在ctptdGateway中
 public:
     std::ofstream g_OutputDebug;
+    bool isEmail {false};       //是否配置邮箱
+    struct EmailInfo
+    {
+        QString server;
+        QString sendAddress;
+        QString password;
+        QString receviceAddress;
+    }emailinfo;
+    QList<Smtp*> emailList;
 };
 
 #endif // MAINENGINE_H

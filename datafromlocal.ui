@@ -55,12 +55,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>80</y>
-     <width>207</width>
+     <x>21</x>
+     <y>81</y>
+     <width>561</width>
      <height>22</height>
     </rect>
    </property>
@@ -68,12 +68,19 @@
     <item>
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>数据库名称:</string>
+       <string>数据库名:</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="lineEdit_2"/>
+     <widget class="QLineEdit" name="databaseName"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>（默认只能输入数字与字母）</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

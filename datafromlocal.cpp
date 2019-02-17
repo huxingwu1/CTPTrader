@@ -7,8 +7,13 @@ DataFromLocal::DataFromLocal(QWidget *parent) :
 {
     ui->setupUi(this);
     setStyleSheet("font:11pt ;background-color: rgb( 90, 90, 90);color: white;");    //字体大小颜色
-    //mydatabase = nullptr;
-    mydatabase = new MyDataBase("localhost","Data/test1.db");
+    // mydatabase = new MyDataBase("localhost","Data/test1.db");
+    mydatabase = nullptr;
+
+    // 数据库名只能输入字母与数字
+    QRegExp regx("[a-zA-Z0-9]+$");
+    QValidator *validator = new QRegExpValidator(regx, ui->databaseName );
+    ui->databaseName->setValidator( validator );
 }
 
 DataFromLocal::~DataFromLocal()
@@ -33,13 +38,26 @@ void DataFromLocal::on_choseFile_clicked()
         QString srcFile=fileDialog->selectedFiles()[0];
         ui->lineEdit->setText(srcFile);
     }
-
 }
 
 // 将选中文件导入数据库
 void DataFromLocal::on_toDatabase_clicked()
 {
-    qDebug()<<QString::fromLocal8Bit("数据导入开始");
+    // 创建mydatabase实例
+    if(nullptr != mydatabase)
+    {
+        delete mydatabase;
+    }
+    QString databaseName = ui->databaseName->text();
+    if(databaseName.isEmpty())
+    {
+        QMessageBox::warning(this, QString::fromLocal8Bit("导入异常"),QString::fromLocal8Bit("数据库名为空，请确认!"),QMessageBox::Ok);
+        return;
+    }
+    QString databasePath = QString("Data/") +databaseName + QString(".db");
+    mydatabase = new MyDataBase("localhost",databasePath);
+
+    //获得csv表格名称
     QString srcPath=ui->lineEdit->text();
     if(srcPath.isEmpty())
     {
@@ -49,7 +67,8 @@ void DataFromLocal::on_toDatabase_clicked()
     QStringList fileList;
     fileList.clear();
     fileList = srcPath.split("/");    //路径按"/"切分
-    QString filename = fileList.at(fileList.size()-1).split(".").at(0) ;    //获得csv表格的文件名
+    QString filename = fileList.at(fileList.size()-1).split(".").at(0) ;
+
     //判断表格是否存在
     if(mydatabase->IsExist(filename))
     {
@@ -57,6 +76,7 @@ void DataFromLocal::on_toDatabase_clicked()
         return;
     }
 
+    // 读取数据文件
     QFile file(srcPath);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -76,7 +96,6 @@ void DataFromLocal::on_toDatabase_clicked()
         }
         //创建表
         mydatabase->create_table(filename,data_name);
-
         // 开始启动事务
         mydatabase->m_db.transaction();
         //插入记录

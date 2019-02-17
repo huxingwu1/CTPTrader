@@ -64,6 +64,8 @@ public slots:
     void MDTDLogin(QString);
     // 添加多账户登录
     void MDTDLogin_n(QString);
+    // 保存邮箱信息
+    void SaveEamil(QString);
 
     void OnInstrmentLineTextSubscribe();
     void OnSendOrderClicked();
